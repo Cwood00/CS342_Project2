@@ -1,3 +1,6 @@
+//Name:Chris Wood, NetID:cwood35
+//Name:Ana Theys,  NatID:athey3
+
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
