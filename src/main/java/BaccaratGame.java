@@ -52,10 +52,10 @@ public class BaccaratGame extends Application {
 	     root.setCenter(rect);
 	     
 	     Scene scene = new Scene(root, 700,700);
-			primaryStage.setScene(scene);
-			primaryStage.show();
-		
-				
+		 primaryStage.setScene(scene);
+		 primaryStage.show();
+
+		Card newCard = new Card("Heart", 5);
 		
 	}
 
