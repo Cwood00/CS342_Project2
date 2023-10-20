@@ -1,7 +1,7 @@
 public class Card {
 
-    public String suite;
-    public int value;
+    String suite;
+    int value;
 
     // suite: Hearts, Diamonds, Clubs, Spades
     // value: numbers 1-13

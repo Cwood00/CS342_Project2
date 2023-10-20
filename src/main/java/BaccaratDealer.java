@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class BaccaratDealer {
-    private ArrayList<Card> deck;
+    ArrayList<Card> deck;
 
     // generates a new standard 52-card deck of Card objects
     public void generateDeck() {

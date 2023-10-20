@@ -23,13 +23,13 @@ import java.util.ArrayList;
 
 
 public class BaccaratGame extends Application {
-	private ArrayList<Card> playerHand;
-	private ArrayList<Card> bankerHand;
-	private BaccaratDealer theDealer;
-	private BaccaratGameLogic gameLogic;
-	private double currentBet;
-	private double totalWinnings;
-	private String betPlacedOn;
+	ArrayList<Card> playerHand;
+	ArrayList<Card> bankerHand;
+	BaccaratDealer theDealer;
+	BaccaratGameLogic gameLogic;
+	double currentBet;
+	double totalWinnings;
+	String betPlacedOn;
 
 	public static void main(String[] args) {
 		launch(args);
