@@ -38,6 +38,9 @@ public class BaccaratGame extends Application {
 	//feel free to remove the starter code from this method
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		theDealer = new BaccaratDealer();
+		gameLogic = new BaccaratGameLogic();
+
 		primaryStage.setTitle("Baccarat");
 
 		//-----Start scene-----//
@@ -84,8 +87,23 @@ public class BaccaratGame extends Application {
 		primaryStage.show();
 	}
 
+	//Evaluates the amount won or lost
+	//Returns the winnings. A loss is represented as winning a negative amount
 	public double evaluateWinnings(){
-		return 0.0;//TODO implement this function
-	}
+		double winnings;
+		String winner = gameLogic.whoWon(playerHand, bankerHand);
 
+		if(betPlacedOn.equals(winner)){
+			if(betPlacedOn.equals("Player"))
+				winnings = currentBet;
+			else if(betPlacedOn.equals("Banker"))
+				winnings = currentBet * 0.95;
+			else //Betting on tie
+				winnings = currentBet * 8;
+		}
+		else
+			winnings = -currentBet;
+
+		return winnings;
+	}
 }
