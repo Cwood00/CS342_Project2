@@ -104,32 +104,55 @@ public class BaccaratDealerTest {
         assertEquals(1, test4.value);
     }
 
-//    @Test
-//    void testDrawOne2() {
-//        BaccaratDealer testDealer = new BaccaratDealer();
-//        testDealer.generateDeck();
-//
-//        for (int i = 0; i < 3; i++) {
-//            Card discard = testDealer.drawOne();
-//        }
-//
-//        Card test1 = testDealer.drawOne();
-//
-//        assertEquals(49, );
-//        Card test2 = testDealer.drawOne();
-//        Card test3 = testDealer.drawOne();
-//        Card test4 = testDealer.drawOne();
-//
-//        assertEquals(48, testDealer.deckSize());
-//
-//        assertEquals("Hearts", test1.suite);
-//        assertEquals(1, test1.value);
-//        assertEquals("Diamonds", test2.suite);
-//        assertEquals(1, test2.value);
-//        assertEquals("Clubs", test3.suite);
-//        assertEquals(1, test3.value);
-//        assertEquals("Spades", test4.suite);
-//        assertEquals(1, test4.value);
-//    }
+    @Test
+    void testDrawOne2() {
+        BaccaratDealer testDealer = new BaccaratDealer();
+        testDealer.generateDeck();
+
+        for (int i = 0; i < 3; i++) {
+            Card discard = testDealer.drawOne();
+        }
+        Card test1 = testDealer.drawOne();
+
+        assertEquals(48, testDealer.deckSize());
+        assertEquals("Spades", test1.suite);
+        assertEquals(1, test1.value);
+
+
+        for (int i = 0; i < 5; i++) {
+            Card discard = testDealer.drawOne();
+        }
+        Card test2 = testDealer.drawOne();
+
+        assertEquals(42, testDealer.deckSize());
+        assertEquals("Diamonds", test2.suite);
+        assertEquals(3, test2.value);
+
+
+        for (int i = 0; i < 10; i++) {
+            Card discard = testDealer.drawOne();
+        }
+        Card test3 = testDealer.drawOne();
+
+        assertEquals(31, testDealer.deckSize());
+        assertEquals("Hearts", test3.suite);
+        assertEquals(6, test3.value);
+
+
+        for (int i = 0; i < 9; i++) {
+            Card discard = testDealer.drawOne();
+        }
+        Card test4 = testDealer.drawOne();
+
+        assertEquals(21, testDealer.deckSize());
+        assertEquals("Clubs", test4.suite);
+        assertEquals(8, test4.value);
+
+    }
+
+
+    // TODO - test shuffleDeck
+
+    // TODO - test deckSize
 
 } // end class
