@@ -7,6 +7,9 @@ import javafx.animation.RotateTransition;
 import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -17,7 +20,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -69,13 +71,80 @@ public class BaccaratGame extends Application {
 
 		TextField playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
 		TextField currentBetTextField = new TextField("Current Bet: $" + currentBet);
-		Button dealAndPlayAgainButton = new Button("Deal");
+		Button dealAndPlayAgainButton = new Button("Draw");
 		TextField resultsTextField = new TextField();
 		playerWinningsTextField.setEditable(false);
 		currentBetTextField.setEditable(false);
 		resultsTextField.setEditable(false);
 
 		VBox centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsTextField);
+
+		//EventHandlers
+		EventHandler<ActionEvent> firstDrawEvent;
+		EventHandler<ActionEvent> replayEvent = new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				//TODO change scene to bet scene when scene is implemented
+				playerHand = null;
+				bankerHand = null;
+				Button thisButton = (Button)event.getSource();
+				//TODO figure out how to reset event handler to draw event
+				//thisButton.setOnAction(firstDrawEvent);
+				thisButton.setText("Draw");
+			}
+		};
+		EventHandler<ActionEvent> bankerDrawEvent = new EventHandler<>() {
+			@Override
+			public void handle(ActionEvent event) {
+				bankerHand.add(theDealer.drawOne());
+				Button thisButton = (Button)event.getSource();
+				//TODO handle winnings
+				thisButton.setOnAction(replayEvent);
+				thisButton.setText("Replay");
+			}
+		};
+		EventHandler<ActionEvent> playerDrawEvent = new EventHandler<>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Card playerDraw = theDealer.drawOne();
+				playerHand.add(playerDraw);
+				Button thisButton = (Button)event.getSource();
+				if(gameLogic.evaluateBankerDraw(bankerHand, playerDraw)) {
+					thisButton.setOnAction(bankerDrawEvent);
+					thisButton.setText("Draw for Banker");
+				}
+				else{
+					//TODO handle winnings
+					thisButton.setOnAction(replayEvent);
+					thisButton.setText("Replay");
+				}
+			}
+		};
+		firstDrawEvent = new EventHandler<>(){
+			@Override
+			public void handle(ActionEvent event) {
+				theDealer.shuffleDeck();
+				playerHand = theDealer.dealHand();
+				bankerHand = theDealer.dealHand();
+				Button thisButton = (Button)event.getSource();
+				if(gameLogic.evaluatePlayerDraw(playerHand)){
+					thisButton.setOnAction(playerDrawEvent);
+					thisButton.setText("Draw for Player");
+					//TODO check for natural win
+				}
+				else if(gameLogic.evaluateBankerDraw(bankerHand, null)){
+					thisButton.setOnAction(bankerDrawEvent);
+					thisButton.setText("Draw for Banker");
+				}
+				else{
+					//TODO handle winnings
+					thisButton.setOnAction(replayEvent);
+					thisButton.setText("Replay");
+				}
+			}
+		};
+
+		dealAndPlayAgainButton.setOnAction(firstDrawEvent);
 
 		playSceneRoot.setLeft(playerCardBox);
 		playSceneRoot.setRight(bankerCardBox);
