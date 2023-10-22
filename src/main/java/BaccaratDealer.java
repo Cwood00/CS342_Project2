@@ -60,6 +60,9 @@ public class BaccaratDealer {
 
     // returns the current size of the deck
     public int deckSize() {
+        if (deck == null) {
+            return 0;
+        }
         return deck.size();
     } // end deckSize()
 

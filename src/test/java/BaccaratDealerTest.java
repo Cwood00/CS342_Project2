@@ -66,7 +66,7 @@ public class BaccaratDealerTest {
         testDealer.generateDeck();
 
         for (int i = 0; i < 7; i++) {
-            Card discard = testDealer.drawOne();
+            testDealer.drawOne();
         }
 
         ArrayList<Card> expected = new ArrayList<>();
@@ -110,7 +110,7 @@ public class BaccaratDealerTest {
         testDealer.generateDeck();
 
         for (int i = 0; i < 3; i++) {
-            Card discard = testDealer.drawOne();
+            testDealer.drawOne();
         }
         Card test1 = testDealer.drawOne();
 
@@ -120,7 +120,7 @@ public class BaccaratDealerTest {
 
 
         for (int i = 0; i < 5; i++) {
-            Card discard = testDealer.drawOne();
+            testDealer.drawOne();
         }
         Card test2 = testDealer.drawOne();
 
@@ -130,7 +130,7 @@ public class BaccaratDealerTest {
 
 
         for (int i = 0; i < 10; i++) {
-            Card discard = testDealer.drawOne();
+            testDealer.drawOne();
         }
         Card test3 = testDealer.drawOne();
 
@@ -140,7 +140,7 @@ public class BaccaratDealerTest {
 
 
         for (int i = 0; i < 9; i++) {
-            Card discard = testDealer.drawOne();
+            testDealer.drawOne();
         }
         Card test4 = testDealer.drawOne();
 
@@ -150,9 +150,81 @@ public class BaccaratDealerTest {
 
     }
 
+    @Test
+    void testShuffleDeck1() {
+        BaccaratDealer defaultDealer = new BaccaratDealer();
+        defaultDealer.generateDeck();
 
-    // TODO - test shuffleDeck
+        BaccaratDealer shuffledDealer1 = new BaccaratDealer();
+        shuffledDealer1.shuffleDeck();
 
-    // TODO - test deckSize
+        BaccaratDealer shuffledDealer2 = new BaccaratDealer();
+        shuffledDealer2.shuffleDeck();
+
+        assertEquals(52, shuffledDealer1.deckSize());
+        assertNotEquals(defaultDealer.deck, shuffledDealer1.deck);
+
+        assertEquals(52, shuffledDealer2.deckSize());
+        assertNotEquals(defaultDealer.deck, shuffledDealer2.deck);
+
+        assertNotEquals(shuffledDealer1.deck, shuffledDealer2.deck);
+    }
+
+    @Test
+    void testShuffleDeck2() {
+        BaccaratDealer defaultDealer = new BaccaratDealer();
+        defaultDealer.generateDeck();
+
+        BaccaratDealer testDealer = new BaccaratDealer();
+        testDealer.generateDeck();
+
+        for (int i = 0; i < 12; i++) {
+            testDealer.drawOne();
+        }
+
+        assertEquals(40, testDealer.deckSize());
+
+        testDealer.shuffleDeck();
+
+        assertEquals(52, testDealer.deckSize());
+        assertNotEquals(defaultDealer.deck, testDealer.deck);
+
+    }
+
+    @Test
+    void testDeckSize1() {
+        BaccaratDealer testDealer = new BaccaratDealer();
+
+        assertEquals(0,testDealer.deckSize());
+
+        testDealer.generateDeck();
+
+        assertEquals(52, testDealer.deckSize());
+
+    }
+
+    @Test
+    void testDeckSize2() {
+        BaccaratDealer testDealer = new BaccaratDealer();
+        testDealer.generateDeck();
+
+        assertEquals(52, testDealer.deckSize());
+
+        for (int i = 0; i < 51; i +=3) {
+            testDealer.drawOne();
+            assertEquals(52-(i+1), testDealer.deckSize());
+
+            testDealer.dealHand();
+            assertEquals(52-(i+3), testDealer.deckSize());
+        }
+
+        assertEquals(1, testDealer.deckSize());
+
+        testDealer.drawOne();
+
+        assertEquals(0, testDealer.deckSize());
+
+    }
+
 
 } // end class
