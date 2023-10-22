@@ -1,25 +1,19 @@
-//Name:Chris Wood, NetID:cwood35
-//Name:Ana Theys,  NatID:athey3
+// Name:Chris Wood, NetID:cwood35
+// Name:Ana Theys,  NatID:athey3
 
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -33,23 +27,50 @@ public class BaccaratGame extends Application {
 	double totalWinnings;
 	String betPlacedOn;
 
+	// Start scene objects
+	Text titleText;
+	Button startGame;
+	VBox layout;
+
+	// Menu bar objects
+	MenuBar mainMenuBar;
+	Menu menuMenu;
+	MenuItem itemExit;
+	MenuItem itemFreshStart;
+
+	// Betting scene objects
+	BorderPane bettingBorderPane;
+	VBox leftBox;
+	VBox centerBox;
+	HBox inputsBox;
+	HBox buttonsBox;
+	TextField betAmount;
+	Button resetBets;
+	Text selectBetText;
+	Button selectPlayer;
+	Button selectTie;
+	Button selectBanker;
+	Text currentBetText;
+	TextField currentBetDisplay;
+	Text totalWinningsText;
+	TextField totalWinningsDisplay;
+	TextField emptyText;
+	Button playButton;
+
+	// Play scene objects
+
+	// ----------------------------------------------------------------------
+
 	public static void main(String[] args) {
 		launch(args);
 	}
 
-	//feel free to remove the starter code from this method
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		theDealer = new BaccaratDealer();
 		gameLogic = new BaccaratGameLogic();
 
 		primaryStage.setTitle("Baccarat");
-
-		//-----Start scene-----//
-		//TODO create start scene
-
-		//-----Betting scene-----//
-		//TODO create betting scene
 
 		//-----Play scene-----//
 		BorderPane playSceneRoot = new BorderPane();
@@ -79,7 +100,7 @@ public class BaccaratGame extends Application {
 
 		VBox centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsTextField);
 
-		//EventHandlers
+		// Play scene EventHandlers
 		EventHandler<ActionEvent> firstDrawEvent;
 		EventHandler<ActionEvent> replayEvent = new EventHandler<ActionEvent>() {
 			@Override
@@ -152,9 +173,144 @@ public class BaccaratGame extends Application {
 
 		Scene playScene = new Scene(playSceneRoot, 1080,720);
 
-		primaryStage.setScene(playScene);//TODO change to start scene when implemented
+		// ----------------------------------------------------------------------
+
+		createMenuBar();
+
+		Scene startScene = createStartScene();
+
+		Scene bettingScene = createBettingScene();
+
+		// TODO - call createPlayScene() when moved into a function
+
+
+		// Start scene event handler
+		startGame.setOnAction(e->primaryStage.setScene(bettingScene));
+
+		// Menu bar event handlers
+		itemExit.setOnAction(e->System.exit(0));
+		itemFreshStart.setOnAction(e->{
+			primaryStage.setScene(startScene);
+			// TODO - fresh start handler
+		});
+
+		// Betting scene event handlers
+		// TODO - write
+
+		// Play scene event handlers
+		// TODO - move here
+
+		// Lights, camera, ACTION
+
+		primaryStage.setScene(startScene);
 		primaryStage.show();
+
+	} // end start()
+
+
+	//-----Start scene-----//
+	public Scene createStartScene() {
+		titleText = new Text("Baccarat");
+		titleText.setStyle("-fx-font-size: 100");
+		// titleText.setStyle("-fx-");
+
+		startGame = new Button("Start");
+		startGame.setStyle("-fx-font-size: 50");
+
+		layout = new VBox(50, titleText, startGame);
+		layout.setAlignment(Pos.CENTER);
+
+		return new Scene(layout, 1080, 720);
+	} // end createStartScene()
+
+
+	//-----Menu Bar-----//
+	public void createMenuBar() {
+		mainMenuBar = new MenuBar();
+
+		menuMenu = new Menu("Menu");
+		menuMenu.setStyle("-fx-font-size: 18");
+		itemExit = new MenuItem("Exit");
+		itemExit.setStyle("-fx-font-size: 18");
+		itemFreshStart = new MenuItem("Fresh Start");
+		itemFreshStart.setStyle("-fx-font-size: 18");
+
+		menuMenu.getItems().addAll(itemFreshStart, itemExit);
+
+		mainMenuBar.getMenus().add(menuMenu);
+
 	}
+
+
+	//-----Betting scene-----//
+	public Scene createBettingScene() {
+		// left side
+		selectBetText = new Text("Add to bet:");
+		selectBetText.setStyle("-fx-font-size: 28");
+		currentBetText = new Text("Current bet:");
+		currentBetText.setStyle("-fx-font-size: 28");
+		totalWinningsText = new Text("Total winnings:");
+		totalWinningsText.setStyle("-fx-font-size: 28");
+		leftBox = new VBox(28, selectBetText, currentBetText, totalWinningsText);
+		leftBox.setAlignment(Pos.CENTER);
+
+		// center
+		betAmount = new TextField();
+		betAmount.setPromptText("Enter amount to bet");
+		betAmount.setStyle("-fx-font-size: 24");
+
+		resetBets = new Button("Reset bets");
+		resetBets.setStyle("-fx-font-size: 24");
+		inputsBox = new HBox(10, betAmount, resetBets);
+
+		selectPlayer = new Button("Player");
+		selectPlayer.setStyle("-fx-font-size: 24");
+		selectTie = new Button("Tie");
+		selectTie.setStyle("-fx-font-size: 24");
+		selectBanker = new Button("Banker");
+		selectBanker.setStyle("-fx-font-size: 24");
+		buttonsBox = new HBox(10, selectPlayer, selectTie, selectBanker);
+
+		currentBetDisplay = new TextField("None selected");
+		currentBetDisplay.setStyle("-fx-font-size: 24");
+		currentBetDisplay.setEditable(false);
+		totalWinningsDisplay = new TextField("5");
+		totalWinningsDisplay.setStyle("-fx-font-size: 24");
+		totalWinningsDisplay.setEditable(false);
+		emptyText = new TextField("hi");
+		emptyText.setStyle("-fx-font-size: 24");
+		emptyText.setEditable(false);
+		emptyText.setVisible(false);
+
+		centerBox = new VBox(20, inputsBox, buttonsBox, currentBetDisplay, totalWinningsDisplay, emptyText);
+		centerBox.setAlignment(Pos.CENTER);
+
+
+		// right side
+		playButton = new Button("Play");
+		playButton.setStyle("-fx-font-size: 24");
+		// playButton.setPrefWidth(totalWinningsText.getLayoutBounds().getWidth());
+
+		Insets inset = new Insets(5);
+		bettingBorderPane = new BorderPane();
+		bettingBorderPane.setTop(mainMenuBar);
+		bettingBorderPane.setLeft(leftBox);
+		bettingBorderPane.setCenter(centerBox);
+		bettingBorderPane.setRight(playButton);
+		BorderPane.setAlignment(playButton, Pos.CENTER);
+		BorderPane.setMargin(leftBox, inset);
+		BorderPane.setMargin(centerBox, inset);
+		BorderPane.setMargin(playButton, inset);
+
+		Scene currentScene = new Scene(bettingBorderPane, 1080, 720);
+		// currentScene.getStylesheets().add("./src/main/resources/styles.css");
+
+		return currentScene;
+	} // end createBettingScene()
+
+
+	//-----Play scene-----//
+	// TODO - move play scene creation here
 
 	//Evaluates the amount won or lost
 	//Returns the winnings. A loss is represented as winning a negative amount
@@ -174,5 +330,7 @@ public class BaccaratGame extends Application {
 			winnings = -currentBet;
 
 		return winnings;
-	}
-}
+	} // end evaluateWinnings()
+
+
+} // end class
