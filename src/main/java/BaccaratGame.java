@@ -58,7 +58,19 @@ public class BaccaratGame extends Application {
 	Button playButton;
 
 	// Play scene objects
-
+	Text playerCardHeader;
+	Text bankerCardHeader;
+	Text playerCardFooter;
+	Text bankerCardFooter;
+	HBox playerHandBox;
+	HBox bankerHandBox;
+	VBox playerCardBox;
+	VBox bankerCardBox;
+	TextField playerWinningsTextField;
+	TextField currentBetTextField;
+	Button dealAndPlayAgainButton;
+	TextField resultsTextField;
+	VBox centralElements;
 	// ----------------------------------------------------------------------
 
 	public static void main(String[] args) {
@@ -72,40 +84,20 @@ public class BaccaratGame extends Application {
 
 		primaryStage.setTitle("Baccarat");
 
-		//-----Play scene-----//
-		BorderPane playSceneRoot = new BorderPane();
+		createMenuBar();
 
-		TextField playerCardHeader = new TextField("Player");
-		TextField bankerCardHeader = new TextField("Banker");
-		TextField playerCardFooter = new TextField("Score: ");
-		TextField bankerCardFooter = new TextField("Score: ");
-		playerCardHeader.setEditable(false);
-		bankerCardHeader.setEditable(false);
-		playerCardFooter.setEditable(false);
-		bankerCardFooter.setEditable(false);
+		Scene startScene = createStartScene();
 
-		HBox playerHandBox = new HBox();
-		HBox bankerHandBox = new HBox();
+		Scene bettingScene = createBettingScene();
 
-		VBox playerCardBox = new VBox(playerCardHeader, playerHandBox, playerCardFooter);
-		VBox bankerCardBox = new VBox(bankerCardHeader, bankerHandBox, bankerCardFooter);
-
-		TextField playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
-		TextField currentBetTextField = new TextField("Current Bet: $" + currentBet);
-		Button dealAndPlayAgainButton = new Button("Draw");
-		TextField resultsTextField = new TextField();
-		playerWinningsTextField.setEditable(false);
-		currentBetTextField.setEditable(false);
-		resultsTextField.setEditable(false);
-
-		VBox centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsTextField);
+		Scene playScene = createPlayScene();
 
 		// Play scene EventHandlers
 		EventHandler<ActionEvent> firstDrawEvent;
 		EventHandler<ActionEvent> replayEvent = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				//TODO change scene to bet scene when scene is implemented
+				primaryStage.setScene(bettingScene);
 				playerHand = null;
 				bankerHand = null;
 				Button thisButton = (Button)event.getSource();
@@ -166,23 +158,6 @@ public class BaccaratGame extends Application {
 		};
 
 		dealAndPlayAgainButton.setOnAction(firstDrawEvent);
-
-		playSceneRoot.setLeft(playerCardBox);
-		playSceneRoot.setRight(bankerCardBox);
-		playSceneRoot.setCenter(centralElements);
-
-		Scene playScene = new Scene(playSceneRoot, 1080,720);
-
-		// ----------------------------------------------------------------------
-
-		createMenuBar();
-
-		Scene startScene = createStartScene();
-
-		Scene bettingScene = createBettingScene();
-
-		// TODO - call createPlayScene() when moved into a function
-
 
 		// Start scene event handler
 		startGame.setOnAction(e->primaryStage.setScene(bettingScene));
@@ -310,7 +285,34 @@ public class BaccaratGame extends Application {
 
 
 	//-----Play scene-----//
-	// TODO - move play scene creation here
+	public Scene createPlayScene(){
+		BorderPane playSceneRoot = new BorderPane();
+
+		playerCardHeader = new Text("Player");
+		bankerCardHeader = new Text("Banker");
+		playerCardFooter = new Text("Score: ");
+		bankerCardFooter = new Text("Score: ");
+		playerHandBox = new HBox();
+		bankerHandBox = new HBox();
+		playerCardBox = new VBox(playerCardHeader, playerHandBox, playerCardFooter);
+		bankerCardBox = new VBox(bankerCardHeader, bankerHandBox, bankerCardFooter);
+		playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
+		currentBetTextField = new TextField("Current Bet: $" + currentBet);
+		dealAndPlayAgainButton = new Button("Draw");
+		resultsTextField = new TextField();
+		centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsTextField);
+
+		playerWinningsTextField.setEditable(false);
+		currentBetTextField.setEditable(false);
+		resultsTextField.setEditable(false);
+
+		playSceneRoot.setTop(mainMenuBar);
+		playSceneRoot.setLeft(playerCardBox);
+		playSceneRoot.setRight(bankerCardBox);
+		playSceneRoot.setCenter(centralElements);
+
+		return new Scene(playSceneRoot, 1080, 720);
+	}// end createPlayScene
 
 	//Evaluates the amount won or lost
 	//Returns the winnings. A loss is represented as winning a negative amount
