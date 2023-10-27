@@ -1,8 +1,11 @@
 // Name:Chris Wood, NetID:cwood35
 // Name:Ana Theys,  NatID:athey3
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -16,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -65,14 +69,18 @@ public class BaccaratGame extends Application {
 	Text playerCardHeader, bankerCardHeader, playerCardFooter, bankerCardFooter;
 	HBox playerHandBox, bankerHandBox;
 	VBox playerCardBox, bankerCardBox;
-	TextField playerWinningsTextField, currentBetTextField, resultsTextField;
+	TextField playerWinningsTextField, currentBetTextField;
+	ListView<String> resultsListView;
+	ObservableList<String> resultsList;
 	ImageView playerCard1, playerCard2, playerCard3, bankerCard1, bankerCard2, bankerCard3;
 	Button dealAndPlayAgainButton;
 	VBox centralElements;
-	EventHandler<ActionEvent> replayEvent;
+	EventHandler<ActionEvent> replayEvent, bankerDrawEvent, playerDrawEvent, firstDrawEvent;
+	PauseTransition firstDealPause, secondDealPause, thirdDealPause;
+	static final double dealBetweenCardDelay = 0.33;
 	static final int cardWidth = 125;
 	static final int cardHeight = 182;
-	// Map of images of all 52 playing card Key is suite, ArrayList index is card number
+	// Map of images of all 52 playing cards. Suite is map key, card number is ArrayList index
 	Map<String, ArrayList<Image>> cardMap;
 	// ----------------------------------------------------------------------
 
@@ -84,7 +92,7 @@ public class BaccaratGame extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		//TODO remove these lines, only here for testing
 		betPlacedOn = "Banker";
-		currentBet = 100.0;
+		currentBet = 100.00;
 
 		theDealer = new BaccaratDealer();
 		gameLogic = new BaccaratGameLogic();
@@ -99,21 +107,61 @@ public class BaccaratGame extends Application {
 		Scene bettingScene = createBettingScene();
 		Scene playScene = createPlayScene();
 
-		// Play scene EventHandlers
-		EventHandler<ActionEvent> firstDrawEvent;
+		// Start scene event handler
+		startGame.setOnAction(e->primaryStage.setScene(bettingScene));
+
+		// Menu bar event handlers
+		itemExit.setOnAction(e->System.exit(0));
+		itemFreshStart.setOnAction(e->{
+			primaryStage.setScene(startScene);
+			// TODO - fresh start handler
+		});
+
+		// Betting scene event handlers
+		// TODO - write
+		playButton.setOnAction(e -> {
+			primaryStage.setScene(playScene);
+		});
+
+		// Play scene event handlers
+
+		firstDealPause.setOnFinished(e ->{
+			playerCard2.setImage(cardMap.get(playerHand.get(1).suite).get(playerHand.get(1).value));
+			secondDealPause.play();
+		});
+
+		secondDealPause.setOnFinished(e ->{
+			bankerCard1.setImage(cardMap.get(bankerHand.get(0).suite).get(bankerHand.get(0).value));
+			thirdDealPause.play();
+		});
+
+		thirdDealPause.setOnFinished(e -> {
+			bankerCard2.setImage(cardMap.get(bankerHand.get(1).suite).get(bankerHand.get(1).value));
+			dealAndPlayAgainButton.setDisable(false);
+		});
+
 		this.replayEvent = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				primaryStage.setScene(bettingScene);
 				playerHand = null;
 				bankerHand = null;
-				Button thisButton = (Button)event.getSource();
-				//TODO figure out how to reset event handler to draw event
-				//thisButton.setOnAction(firstDrawEvent);
-				thisButton.setText("Draw");
+				playerCard1.setImage(null);
+				playerCard2.setImage(null);
+				playerCard3.setImage(null);
+				bankerCard1.setImage(null);
+				bankerCard2.setImage(null);
+				bankerCard3.setImage(null);
+
+				playerCardFooter.setText("Score: 0");
+				bankerCardFooter.setText("Score: 0");
+
+				Button thisButton = ((Button)event.getSource());
+				thisButton.setText("Deal");
+				thisButton.setOnAction(firstDrawEvent);
 			}
 		};
-		EventHandler<ActionEvent> bankerDrawEvent = new EventHandler<>() {
+		this.bankerDrawEvent = new EventHandler<>() {
 			@Override
 			public void handle(ActionEvent event) {
 				//Draw card
@@ -127,7 +175,7 @@ public class BaccaratGame extends Application {
 				endRound();
 			}
 		};
-		EventHandler<ActionEvent> playerDrawEvent = new EventHandler<>() {
+		this.playerDrawEvent = new EventHandler<>() {
 			@Override
 			public void handle(ActionEvent event) {
 				//Draw card
@@ -149,7 +197,7 @@ public class BaccaratGame extends Application {
 				}
 			}
 		};
-		firstDrawEvent = new EventHandler<>(){
+		this.firstDrawEvent = new EventHandler<>(){
 			@Override
 			public void handle(ActionEvent event) {
 				//Deal cards
@@ -161,11 +209,10 @@ public class BaccaratGame extends Application {
 				bankerCardFooter.setText("Score: " + gameLogic.handTotal(bankerHand));
 				//Display cards
 				playerCard1.setImage(cardMap.get(playerHand.get(0).suite).get(playerHand.get(0).value));
-				playerCard2.setImage(cardMap.get(playerHand.get(1).suite).get(playerHand.get(1).value));
-				bankerCard1.setImage(cardMap.get(bankerHand.get(0).suite).get(bankerHand.get(0).value));
-				bankerCard2.setImage(cardMap.get(bankerHand.get(1).suite).get(bankerHand.get(1).value));
+				firstDealPause.play();
 
 				Button thisButton = (Button)event.getSource();
+				thisButton.setDisable(true);
 
 				if(gameLogic.handTotal(playerHand) >= 8 || gameLogic.handTotal(bankerHand) >= 8){//Natural win
 					endRound();
@@ -186,25 +233,9 @@ public class BaccaratGame extends Application {
 
 		dealAndPlayAgainButton.setOnAction(firstDrawEvent);
 
-		// Start scene event handler
-		startGame.setOnAction(e->primaryStage.setScene(bettingScene));
-
-		// Menu bar event handlers
-		itemExit.setOnAction(e->System.exit(0));
-		itemFreshStart.setOnAction(e->{
-			primaryStage.setScene(startScene);
-			// TODO - fresh start handler
-		});
-
-		// Betting scene event handlers
-		// TODO - write
-
-		// Play scene event handlers
-		// TODO - move here
-
 		// Lights, camera, ACTION
 
-		primaryStage.setScene(playScene);
+		primaryStage.setScene(startScene);
 		primaryStage.show();
 
 	} // end start()
@@ -325,12 +356,21 @@ public class BaccaratGame extends Application {
 
 	//-----Play scene-----//
 	public Scene createPlayScene(){
+		firstDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
+		secondDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
+		thirdDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
+
 		BorderPane playSceneRoot = new BorderPane();
 
 		playerCardHeader = new Text("Player");
 		bankerCardHeader = new Text("Banker");
 		playerCardFooter = new Text("Score: 0");
 		bankerCardFooter = new Text("Score: 0");
+
+		playerCardHeader.setStyle("-fx-font-size: 32");
+		bankerCardHeader.setStyle("-fx-font-size: 32");
+		playerCardFooter.setStyle("-fx-font-size: 32");
+		bankerCardFooter.setStyle("-fx-font-size: 32");
 
 		playerCard1 = new ImageView();
 		playerCard2 = new ImageView();
@@ -345,9 +385,10 @@ public class BaccaratGame extends Application {
 		bankerCardBox = new VBox(bankerCardHeader, bankerHandBox, bankerCardFooter);
 		playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
 		currentBetTextField = new TextField("Current Bet: $" + currentBet);
-		dealAndPlayAgainButton = new Button("Draw");
-		resultsTextField = new TextField();
-		centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsTextField);
+		dealAndPlayAgainButton = new Button("Deal");
+		resultsListView = new ListView<>();
+		resultsList = FXCollections.observableArrayList();
+		centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsListView);
 
 		playerCard1.setFitWidth(cardWidth);
 		playerCard1.setFitHeight(cardHeight);
@@ -364,13 +405,13 @@ public class BaccaratGame extends Application {
 
 		playerWinningsTextField.setEditable(false);
 		currentBetTextField.setEditable(false);
-		resultsTextField.setEditable(false);
-		resultsTextField.setPrefColumnCount(3);
 
 		playSceneRoot.setTop(mainMenuBar);
 		playSceneRoot.setLeft(playerCardBox);
 		playSceneRoot.setRight(bankerCardBox);
 		playSceneRoot.setCenter(centralElements);
+
+		playSceneRoot.setStyle("-fx-background-color: DarkGreen");
 
 		return new Scene(playSceneRoot, 1080, 720);
 	}// end createPlayScene
@@ -395,21 +436,28 @@ public class BaccaratGame extends Application {
 		return winnings;
 	} // end evaluateWinnings()
 
+	//Called whenever a round ends. Evaluates the winnings, displays the result,
+	//and sets up button for replaying the game
 	public void endRound(){
 		double roundWinnings = evaluateWinnings();
-		String displayedResults = "Player Total: " + gameLogic.handTotal(playerHand) +
-				                  " Banker Total: " + gameLogic.handTotal(bankerHand) + "\n" +
-				                   gameLogic.whoWon(playerHand, bankerHand) + "\n";
-
 		totalWinnings += evaluateWinnings();
 		playerWinningsTextField.setText("Player total winnings: $" + totalWinnings);
 
+		resultsList.add("Player Total: " + gameLogic.handTotal(playerHand) +
+				" Banker Total: " + gameLogic.handTotal(bankerHand));
+		String winner = gameLogic.whoWon(playerHand, bankerHand);
+		if(winner.equals("Draw")) {
+            resultsList.add(winner);
+        } else {
+            resultsList.add(winner + "wins");
+        }
 		if(roundWinnings < 0){
-			resultsTextField.setText(displayedResults + "Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
+			resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
 		}
 		else{
-			resultsTextField.setText(displayedResults + "Congrats you bet " + this.betPlacedOn + "! You won!");
+			resultsList.add("Congrats you bet " + this.betPlacedOn + "! You won!");
 		}
+		resultsListView.setItems(resultsList);
 
 		dealAndPlayAgainButton.setOnAction(replayEvent);
 		dealAndPlayAgainButton.setText("Replay");
