@@ -78,8 +78,8 @@ public class BaccaratGame extends Application {
 	EventHandler<ActionEvent> replayEvent, bankerDrawEvent, playerDrawEvent, firstDrawEvent;
 	PauseTransition firstDealPause, secondDealPause, thirdDealPause;
 	static final double dealBetweenCardDelay = 0.33;
-	static final int cardWidth = 125;
-	static final int cardHeight = 182;
+	static final int cardWidth = 120;
+	static final int cardHeight = 175;
 	// Map of images of all 52 playing cards. Suite is map key, card number is ArrayList index
 	Map<String, ArrayList<Image>> cardMap;
 	// ----------------------------------------------------------------------
@@ -91,7 +91,7 @@ public class BaccaratGame extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		//TODO remove these lines, only here for testing
-		betPlacedOn = "Banker";
+		betPlacedOn = "Draw";
 		currentBet = 100.00;
 
 		theDealer = new BaccaratDealer();
@@ -127,6 +127,8 @@ public class BaccaratGame extends Application {
 
 		firstDealPause.setOnFinished(e ->{
 			playerCard2.setImage(cardMap.get(playerHand.get(1).suite).get(playerHand.get(1).value));
+			//Display score for player
+			playerCardFooter.setText("Score: " + gameLogic.handTotal(playerHand));
 			secondDealPause.play();
 		});
 
@@ -137,13 +139,31 @@ public class BaccaratGame extends Application {
 
 		thirdDealPause.setOnFinished(e -> {
 			bankerCard2.setImage(cardMap.get(bankerHand.get(1).suite).get(bankerHand.get(1).value));
+			//Display score for banker
+			bankerCardFooter.setText("Score: " + gameLogic.handTotal(bankerHand));
+
 			dealAndPlayAgainButton.setDisable(false);
+			if(gameLogic.handTotal(playerHand) >= 8 || gameLogic.handTotal(bankerHand) >= 8){//Natural win
+				endRound();
+			}
+			else if(gameLogic.evaluatePlayerDraw(playerHand)){
+				dealAndPlayAgainButton.setOnAction(playerDrawEvent);
+				dealAndPlayAgainButton.setText("Draw for Player");
+			}
+			else if(gameLogic.evaluateBankerDraw(bankerHand, null)){
+				dealAndPlayAgainButton.setOnAction(bankerDrawEvent);
+				dealAndPlayAgainButton.setText("Draw for Banker");
+			}
+			else{
+				endRound();
+			}
 		});
 
 		this.replayEvent = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				primaryStage.setScene(bettingScene);
+
 				playerHand = null;
 				bankerHand = null;
 				playerCard1.setImage(null);
@@ -155,6 +175,9 @@ public class BaccaratGame extends Application {
 
 				playerCardFooter.setText("Score: 0");
 				bankerCardFooter.setText("Score: 0");
+
+				resultsList.clear();
+				resultsListView.setItems(resultsList);
 
 				Button thisButton = ((Button)event.getSource());
 				thisButton.setText("Deal");
@@ -204,30 +227,12 @@ public class BaccaratGame extends Application {
 				theDealer.shuffleDeck();
 				playerHand = theDealer.dealHand();
 				bankerHand = theDealer.dealHand();
-				//Display score for cards
-				playerCardFooter.setText("Score: " + gameLogic.handTotal(playerHand));
-				bankerCardFooter.setText("Score: " + gameLogic.handTotal(bankerHand));
+
 				//Display cards
 				playerCard1.setImage(cardMap.get(playerHand.get(0).suite).get(playerHand.get(0).value));
 				firstDealPause.play();
 
-				Button thisButton = (Button)event.getSource();
-				thisButton.setDisable(true);
-
-				if(gameLogic.handTotal(playerHand) >= 8 || gameLogic.handTotal(bankerHand) >= 8){//Natural win
-					endRound();
-				}
-				else if(gameLogic.evaluatePlayerDraw(playerHand)){
-					thisButton.setOnAction(playerDrawEvent);
-					thisButton.setText("Draw for Player");
-				}
-				else if(gameLogic.evaluateBankerDraw(bankerHand, null)){
-					thisButton.setOnAction(bankerDrawEvent);
-					thisButton.setText("Draw for Banker");
-				}
-				else{
-					endRound();
-				}
+				((Button)event.getSource()).setDisable(true);
 			}
 		};
 
@@ -390,6 +395,12 @@ public class BaccaratGame extends Application {
 		resultsList = FXCollections.observableArrayList();
 		centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsListView);
 
+		playerWinningsTextField.setMaxSize(512, 32);
+		currentBetTextField.setPadding(new Insets(20, 0,50,0));
+		currentBetTextField.setMaxSize(512, 32);
+		dealAndPlayAgainButton.setPrefSize(512, 48);
+		dealAndPlayAgainButton.setStyle("-fx-font-size: 24");
+
 		playerCard1.setFitWidth(cardWidth);
 		playerCard1.setFitHeight(cardHeight);
 		playerCard2.setFitWidth(cardWidth);
@@ -405,6 +416,17 @@ public class BaccaratGame extends Application {
 
 		playerWinningsTextField.setEditable(false);
 		currentBetTextField.setEditable(false);
+		playerWinningsTextField.setStyle("-fx-font-size: 20");
+		currentBetTextField.setStyle("-fx-font-size: 20");
+		resultsListView.setStyle("-fx-font-size: 16");
+		resultsListView.setPrefHeight(125);
+
+		BorderPane.setAlignment(playerCardBox, Pos.BOTTOM_CENTER);
+		BorderPane.setAlignment(bankerCardBox, Pos.BOTTOM_CENTER);
+		BorderPane.setAlignment(centralElements, Pos.CENTER);
+		BorderPane.setMargin(playerCardBox, new Insets(5));
+		BorderPane.setMargin(bankerCardBox, new Insets(5));
+		BorderPane.setMargin(centralElements, new Insets(5));
 
 		playSceneRoot.setTop(mainMenuBar);
 		playSceneRoot.setLeft(playerCardBox);
@@ -449,7 +471,7 @@ public class BaccaratGame extends Application {
 		if(winner.equals("Draw")) {
             resultsList.add(winner);
         } else {
-            resultsList.add(winner + "wins");
+            resultsList.add(winner + " wins");
         }
 		if(roundWinnings < 0){
 			resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
