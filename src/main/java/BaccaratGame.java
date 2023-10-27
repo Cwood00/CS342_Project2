@@ -45,6 +45,10 @@ public class BaccaratGame extends Application {
 	Menu menuMenu;
 	MenuItem itemExit;
 	MenuItem itemFreshStart;
+	MenuBar mainMenuBar2;
+	Menu menuMenu2;
+	MenuItem itemExit2;
+	MenuItem itemFreshStart2;
 
 	// Betting scene objects
 	BorderPane bettingBorderPane;
@@ -82,6 +86,8 @@ public class BaccaratGame extends Application {
 	static final int cardHeight = 175;
 	// Map of images of all 52 playing cards. Suite is map key, card number is ArrayList index
 	Map<String, ArrayList<Image>> cardMap;
+
+
 	// ----------------------------------------------------------------------
 
 	public static void main(String[] args) {
@@ -90,9 +96,9 @@ public class BaccaratGame extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		//TODO remove these lines, only here for testing
-		betPlacedOn = "Draw";
-		currentBet = 100.00;
+//		//TODO remove these lines, only here for testing
+//		betPlacedOn = "Draw";
+//		currentBet = 100.00;
 
 		theDealer = new BaccaratDealer();
 		gameLogic = new BaccaratGameLogic();
@@ -102,26 +108,72 @@ public class BaccaratGame extends Application {
 		populateCardMap();
 
 		createMenuBar();
+		createMenuBar2();
 
 		Scene startScene = createStartScene();
 		Scene bettingScene = createBettingScene();
 		Scene playScene = createPlayScene();
 
 		// Start scene event handler
-		startGame.setOnAction(e->primaryStage.setScene(bettingScene));
+		startGame.setOnAction(e-> {
+			primaryStage.setScene(bettingScene);
+			resetBettingScene();
+		});
 
 		// Menu bar event handlers
 		itemExit.setOnAction(e->System.exit(0));
+		itemExit2.setOnAction(e->System.exit(0));
 		itemFreshStart.setOnAction(e->{
-			primaryStage.setScene(startScene);
 			// TODO - fresh start handler
+			primaryStage.setScene(startScene);
+		});
+		itemFreshStart2.setOnAction(e->{
+			// TODO - fresh start handler
+			primaryStage.setScene(startScene);
 		});
 
 		// Betting scene event handlers
 		// TODO - write
 		playButton.setOnAction(e -> {
+			playerWinningsTextField.setText("Player total winnings: $" + totalWinnings);
+			currentBetTextField.setText("Current Bet: $" + currentBet + " on " + betPlacedOn);
 			primaryStage.setScene(playScene);
 		});
+
+		selectPlayer.setOnAction(e-> {
+			if (!betAmount.getText().isEmpty()) {
+				currentBet = Double.parseDouble(betAmount.getText());
+				betPlacedOn = "Player";
+				currentBetDisplay.setText("$" + currentBet + " on " + betPlacedOn);
+				selectTie.setDisable(true);
+				selectBanker.setDisable(true);
+				playButton.setDisable(false);
+			}
+		});
+
+		selectTie.setOnAction(e-> {
+			if (!betAmount.getText().isEmpty()) {
+				currentBet = Double.parseDouble(betAmount.getText());
+				betPlacedOn = "Draw";
+				currentBetDisplay.setText("$" + currentBet + " on " + "Tie");
+				selectPlayer.setDisable(true);
+				selectBanker.setDisable(true);
+				playButton.setDisable(false);
+			}
+		});
+
+		selectBanker.setOnAction(e-> {
+			if (!betAmount.getText().isEmpty()) {
+				currentBet = Double.parseDouble(betAmount.getText());
+				betPlacedOn = "Banker";
+				currentBetDisplay.setText("$" + currentBet + " on " + betPlacedOn);
+				selectPlayer.setDisable(true);
+				selectTie.setDisable(true);
+				playButton.setDisable(false);
+			}
+		});
+
+		resetBets.setOnAction(e->resetBettingScene());
 
 		// Play scene event handlers
 
@@ -162,6 +214,7 @@ public class BaccaratGame extends Application {
 		this.replayEvent = new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				resetBettingScene();
 				primaryStage.setScene(bettingScene);
 
 				playerHand = null;
@@ -290,6 +343,21 @@ public class BaccaratGame extends Application {
 		mainMenuBar.getMenus().add(menuMenu);
 
 	}
+	public void createMenuBar2() {
+		mainMenuBar2 = new MenuBar();
+
+		menuMenu2 = new Menu("Menu");
+		menuMenu2.setStyle("-fx-font-size: 18");
+		itemExit2 = new MenuItem("Exit");
+		itemExit2.setStyle("-fx-font-size: 18");
+		itemFreshStart2 = new MenuItem("Fresh Start");
+		itemFreshStart2.setStyle("-fx-font-size: 18");
+
+		menuMenu2.getItems().addAll(itemFreshStart2, itemExit2);
+
+		mainMenuBar2.getMenus().add(menuMenu2);
+
+	}
 
 
 	//-----Betting scene-----//
@@ -324,7 +392,7 @@ public class BaccaratGame extends Application {
 		currentBetDisplay = new TextField("None selected");
 		currentBetDisplay.setStyle("-fx-font-size: 24");
 		currentBetDisplay.setEditable(false);
-		totalWinningsDisplay = new TextField("5");
+		totalWinningsDisplay = new TextField("$"+totalWinnings);
 		totalWinningsDisplay.setStyle("-fx-font-size: 24");
 		totalWinningsDisplay.setEditable(false);
 		emptyText = new TextField("hi");
@@ -338,12 +406,13 @@ public class BaccaratGame extends Application {
 
 		// right side
 		playButton = new Button("Play");
+		playButton.setDisable(true);
 		playButton.setStyle("-fx-font-size: 24");
 		// playButton.setPrefWidth(totalWinningsText.getLayoutBounds().getWidth());
 
 		Insets inset = new Insets(5);
 		bettingBorderPane = new BorderPane();
-		bettingBorderPane.setTop(mainMenuBar);
+		bettingBorderPane.setTop(mainMenuBar2);
 		bettingBorderPane.setLeft(leftBox);
 		bettingBorderPane.setCenter(centerBox);
 		bettingBorderPane.setRight(playButton);
@@ -357,6 +426,16 @@ public class BaccaratGame extends Application {
 
 		return currentScene;
 	} // end createBettingScene()
+
+	private void resetBettingScene() {
+		betAmount.clear();
+		selectPlayer.setDisable(false);
+		selectTie.setDisable(false);
+		selectBanker.setDisable(false);
+		currentBetDisplay.setText("None selected");
+		totalWinningsDisplay.setText("$" + totalWinnings);
+		playButton.setDisable(true);
+	}
 
 
 	//-----Play scene-----//
@@ -389,7 +468,7 @@ public class BaccaratGame extends Application {
 		playerCardBox = new VBox(playerCardHeader, playerHandBox, playerCardFooter);
 		bankerCardBox = new VBox(bankerCardHeader, bankerHandBox, bankerCardFooter);
 		playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
-		currentBetTextField = new TextField("Current Bet: $" + currentBet);
+		currentBetTextField = new TextField("Current Bet: $" + currentBet + " on " + betPlacedOn);
 		dealAndPlayAgainButton = new Button("Deal");
 		resultsListView = new ListView<>();
 		resultsList = FXCollections.observableArrayList();
