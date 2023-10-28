@@ -96,9 +96,6 @@ public class BaccaratGame extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-//		//TODO remove these lines, only here for testing
-//		betPlacedOn = "Draw";
-//		currentBet = 100.00;
 
 		theDealer = new BaccaratDealer();
 		gameLogic = new BaccaratGameLogic();
@@ -124,16 +121,17 @@ public class BaccaratGame extends Application {
 		itemExit.setOnAction(e->System.exit(0));
 		itemExit2.setOnAction(e->System.exit(0));
 		itemFreshStart.setOnAction(e->{
-			// TODO - fresh start handler
+			totalWinnings = 0;
+			resetPlayScene();
 			primaryStage.setScene(startScene);
 		});
 		itemFreshStart2.setOnAction(e->{
-			// TODO - fresh start handler
+			totalWinnings = 0;
+			resetPlayScene();
 			primaryStage.setScene(startScene);
 		});
 
 		// Betting scene event handlers
-		// TODO - write
 		playButton.setOnAction(e -> {
 			playerWinningsTextField.setText("Player total winnings: $" + totalWinnings);
 			currentBetTextField.setText("Current Bet: $" + currentBet + " on " + betPlacedOn);
@@ -215,26 +213,9 @@ public class BaccaratGame extends Application {
 			@Override
 			public void handle(ActionEvent event) {
 				resetBettingScene();
+				resetPlayScene();
+
 				primaryStage.setScene(bettingScene);
-
-				playerHand = null;
-				bankerHand = null;
-				playerCard1.setImage(null);
-				playerCard2.setImage(null);
-				playerCard3.setImage(null);
-				bankerCard1.setImage(null);
-				bankerCard2.setImage(null);
-				bankerCard3.setImage(null);
-
-				playerCardFooter.setText("Score: 0");
-				bankerCardFooter.setText("Score: 0");
-
-				resultsList.clear();
-				resultsListView.setItems(resultsList);
-
-				Button thisButton = ((Button)event.getSource());
-				thisButton.setText("Deal");
-				thisButton.setOnAction(firstDrawEvent);
 			}
 		};
 		this.bankerDrawEvent = new EventHandler<>() {
@@ -421,10 +402,8 @@ public class BaccaratGame extends Application {
 		BorderPane.setMargin(centerBox, inset);
 		BorderPane.setMargin(playButton, inset);
 
-		Scene currentScene = new Scene(bettingBorderPane, 1080, 720);
-		// currentScene.getStylesheets().add("./src/main/resources/styles.css");
+		return new Scene(bettingBorderPane, 1080, 720);
 
-		return currentScene;
 	} // end createBettingScene()
 
 	private void resetBettingScene() {
@@ -516,6 +495,28 @@ public class BaccaratGame extends Application {
 
 		return new Scene(playSceneRoot, 1080, 720);
 	}// end createPlayScene
+
+
+	private void resetPlayScene() {
+		playerHand = null;
+		bankerHand = null;
+		playerCard1.setImage(null);
+		playerCard2.setImage(null);
+		playerCard3.setImage(null);
+		bankerCard1.setImage(null);
+		bankerCard2.setImage(null);
+		bankerCard3.setImage(null);
+
+		playerCardFooter.setText("Score: 0");
+		bankerCardFooter.setText("Score: 0");
+
+		resultsList.clear();
+		resultsListView.setItems(resultsList);
+
+		Button thisButton = dealAndPlayAgainButton;
+		thisButton.setText("Deal");
+		thisButton.setOnAction(firstDrawEvent);
+	}
 
 	//Evaluates the amount won or lost
 	//Returns the winnings. A loss is represented as winning a negative amount
