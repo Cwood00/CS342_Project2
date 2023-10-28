@@ -12,11 +12,14 @@ import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -295,16 +298,24 @@ public class BaccaratGame extends Application {
 	//-----Start scene-----//
 	public Scene createStartScene() {
 		titleText = new Text("Baccarat");
-		titleText.setStyle("-fx-font-size: 100");
-		// titleText.setStyle("-fx-");
+		// titleText.setStyle("-fx-font-size: 150");
+		titleText.setStyle("-fx-font: 150 Verdana");
+		titleText.setFill(Color.WHITE);
+		titleText.setStroke(Color.BLACK);
+		titleText.setStrokeWidth(5);
 
 		startGame = new Button("Start");
-		startGame.setStyle("-fx-font-size: 50");
+		startGame.setId("play-button");
+		startGame.setEffect(new DropShadow());
 
 		layout = new VBox(50, titleText, startGame);
 		layout.setAlignment(Pos.CENTER);
+		layout.setId("background");
 
-		return new Scene(layout, 1080, 720);
+		Scene startScene = new Scene(layout, 1080, 720);
+		startScene.getStylesheets().add(String.valueOf(this.getClass().getResource("style.css")));
+
+		return startScene;
 	} // end createStartScene()
 
 
@@ -345,11 +356,12 @@ public class BaccaratGame extends Application {
 	public Scene createBettingScene() {
 		// left side
 		selectBetText = new Text("Add to bet:");
-		selectBetText.setStyle("-fx-font-size: 28");
+		selectBetText.setId("display-bet-text");
 		currentBetText = new Text("Current bet:");
-		currentBetText.setStyle("-fx-font-size: 28");
+		currentBetText.setId("display-bet-text");
 		totalWinningsText = new Text("Total winnings:");
-		totalWinningsText.setStyle("-fx-font-size: 28");
+		totalWinningsText.setId("display-bet-text");
+
 		leftBox = new VBox(28, selectBetText, currentBetText, totalWinningsText);
 		leftBox.setAlignment(Pos.CENTER);
 
@@ -388,11 +400,11 @@ public class BaccaratGame extends Application {
 		// right side
 		playButton = new Button("Play");
 		playButton.setDisable(true);
-		playButton.setStyle("-fx-font-size: 24");
-		// playButton.setPrefWidth(totalWinningsText.getLayoutBounds().getWidth());
+		playButton.setId("play-button");
 
 		Insets inset = new Insets(5);
 		bettingBorderPane = new BorderPane();
+		bettingBorderPane.setId("background");
 		bettingBorderPane.setTop(mainMenuBar2);
 		bettingBorderPane.setLeft(leftBox);
 		bettingBorderPane.setCenter(centerBox);
@@ -402,8 +414,10 @@ public class BaccaratGame extends Application {
 		BorderPane.setMargin(centerBox, inset);
 		BorderPane.setMargin(playButton, inset);
 
-		return new Scene(bettingBorderPane, 1080, 720);
+		Scene bettingScene = new Scene(bettingBorderPane, 1080, 720);
+		bettingScene.getStylesheets().add(String.valueOf(this.getClass().getResource("style.css")));
 
+		return bettingScene;
 	} // end createBettingScene()
 
 	private void resetBettingScene() {
@@ -430,10 +444,10 @@ public class BaccaratGame extends Application {
 		playerCardFooter = new Text("Score: 0");
 		bankerCardFooter = new Text("Score: 0");
 
-		playerCardHeader.setStyle("-fx-font-size: 32");
-		bankerCardHeader.setStyle("-fx-font-size: 32");
-		playerCardFooter.setStyle("-fx-font-size: 32");
-		bankerCardFooter.setStyle("-fx-font-size: 32");
+		playerCardHeader.setId("display-play-text");
+		bankerCardHeader.setId("display-play-text");
+		playerCardFooter.setId("display-play-text");
+		bankerCardFooter.setId("display-play-text");
 
 		playerCard1 = new ImageView();
 		playerCard2 = new ImageView();
@@ -491,9 +505,12 @@ public class BaccaratGame extends Application {
 		playSceneRoot.setRight(bankerCardBox);
 		playSceneRoot.setCenter(centralElements);
 
-		playSceneRoot.setStyle("-fx-background-color: DarkGreen");
+		playSceneRoot.setId("background");
 
-		return new Scene(playSceneRoot, 1080, 720);
+		Scene startScene = new Scene(playSceneRoot, 1080, 720);
+		startScene.getStylesheets().add(String.valueOf(this.getClass().getResource("style.css")));
+
+		return startScene;
 	}// end createPlayScene
 
 

@@ -1,0 +1,24 @@
+#background {
+    -fx-background-image: url("green_poker_table_background.jpg");
+    -fx-background-position: center center;
+    -fx-background-size: 1080 720;
+}
+
+#play-button {
+    -fx-font-size: 50;
+    -fx-border-radius: 25px;
+    -fx-background-radius: 30px;
+    -fx-background-color: #5eb561;
+    -fx-border-width: 4;
+    -fx-border-color: "Black";
+}
+
+#display-bet-text {
+    -fx-font-size: 28;
+    -fx-fill: "White";
+}
+
+#display-play-text {
+    -fx-font-size: 32;
+    -fx-fill: "White";
+}
