@@ -137,7 +137,6 @@ public class BaccaratGame extends Application {
 		// Betting scene event handlers
 		playButton.setOnAction(e -> {
 			playerWinningsTextField.setText("Player total winnings: $" + totalWinnings);
-			currentBetTextField.setText("Current Bet: $" + currentBet + " on " + betPlacedOn);
 			primaryStage.setScene(playScene);
 		});
 
@@ -146,6 +145,7 @@ public class BaccaratGame extends Application {
 				currentBet = Double.parseDouble(betAmount.getText());
 				betPlacedOn = "Player";
 				currentBetDisplay.setText("$" + currentBet + " on " + betPlacedOn);
+				currentBetTextField.setText("Current Bet: $" + currentBet + " on " + betPlacedOn);
 				selectTie.setDisable(true);
 				selectBanker.setDisable(true);
 				playButton.setDisable(false);
@@ -157,6 +157,7 @@ public class BaccaratGame extends Application {
 				currentBet = Double.parseDouble(betAmount.getText());
 				betPlacedOn = "Draw";
 				currentBetDisplay.setText("$" + currentBet + " on " + "Tie");
+				currentBetTextField.setText("Current Bet: $" + currentBet + " on Tie");
 				selectPlayer.setDisable(true);
 				selectBanker.setDisable(true);
 				playButton.setDisable(false);
@@ -549,9 +550,9 @@ public class BaccaratGame extends Application {
 			else //Betting on tie
 				winnings = currentBet * 8;
 		}
-		else
+		else {
 			winnings = -currentBet;
-
+		}
 		return winnings;
 	} // end evaluateWinnings()
 
@@ -565,16 +566,26 @@ public class BaccaratGame extends Application {
 		resultsList.add("Player Total: " + gameLogic.handTotal(playerHand) +
 				" Banker Total: " + gameLogic.handTotal(bankerHand));
 		String winner = gameLogic.whoWon(playerHand, bankerHand);
+
 		if(winner.equals("Draw")) {
-            resultsList.add(winner);
+            resultsList.add("Tie");
         } else {
             resultsList.add(winner + " wins");
         }
-		if(roundWinnings < 0){
-			resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
-		}
-		else{
-			resultsList.add("Congrats you bet " + this.betPlacedOn + "! You won!");
+
+		if(this.betPlacedOn.equals("Draw"))
+		{
+			if (roundWinnings < 0) {
+				resultsList.add("Sorry, you bet Tie! You lost your bet!");
+			} else {
+				resultsList.add("Congrats you bet Tie! You won!");
+			}
+		}else {
+			if (roundWinnings < 0) {
+				resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
+			} else {
+				resultsList.add("Congrats you bet " + this.betPlacedOn + "! You won!");
+			}
 		}
 		resultsListView.setItems(resultsList);
 
