@@ -15,7 +15,6 @@ import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -81,7 +80,8 @@ public class BaccaratGame extends Application {
 	ObservableList<String> resultsList;
 	ImageView[] playerCards, bankerCards;
 	Button dealAndPlayAgainButton;
-	VBox centralElements;
+	VBox playSceneElements, topCentralElements, bottomCentralElements;
+	HBox bottomElements;
 	EventHandler<ActionEvent> replayEvent, bankerDrawEvent, playerDrawEvent, firstDrawEvent;
 	PauseTransition firstDealPause, secondDealPause, thirdDealPause;
 	static final double dealBetweenCardDelay = 0.33;
@@ -198,6 +198,7 @@ public class BaccaratGame extends Application {
 			bankerCardFooter.setText("Score: " + gameLogic.handTotal(bankerHand));
 
 			dealAndPlayAgainButton.setDisable(false);
+			//Figure out if more cards need to be drawn
 			if(gameLogic.handTotal(playerHand) >= 8 || gameLogic.handTotal(bankerHand) >= 8){//Natural win
 				endRound();
 			}
@@ -435,81 +436,82 @@ public class BaccaratGame extends Application {
 
 	//-----Play scene-----//
 	public Scene createPlayScene(){
+		//Pause transitions
 		firstDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
 		secondDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
 		thirdDealPause = new PauseTransition(Duration.seconds(dealBetweenCardDelay));
 
-		BorderPane playSceneRoot = new BorderPane();
-
+		//Header and footer text for hands
 		playerCardHeader = new Text("Player");
 		bankerCardHeader = new Text("Banker");
 		playerCardFooter = new Text("Score: 0");
 		bankerCardFooter = new Text("Score: 0");
-
 		playerCardHeader.setId("display-play-text");
 		bankerCardHeader.setId("display-play-text");
 		playerCardFooter.setId("display-play-text");
 		bankerCardFooter.setId("display-play-text");
 
+		//Image views for cards
 		playerCards = new ImageView[3];
 		bankerCards = new ImageView[3];
 		for(int i = 0; i < 3; i ++) {
 			playerCards[i] = new ImageView();
+			playerCards[i].setFitWidth(cardWidth);
+			playerCards[i].setFitHeight(cardHeight);
 			bankerCards[i] = new ImageView();
+			bankerCards[i].setFitWidth(cardWidth);
+			bankerCards[i].setFitHeight(cardHeight);
 		}
 
+		//Boxes for displaying cards and scores
 		playerHandBox = new HBox(playerCards[0], playerCards[1], playerCards[2]);
 		bankerHandBox = new HBox(bankerCards[0], bankerCards[1], bankerCards[2]);
 		playerCardBox = new VBox(playerCardHeader, playerHandBox, playerCardFooter);
 		bankerCardBox = new VBox(bankerCardHeader, bankerHandBox, bankerCardFooter);
+
+		//Top textFields
 		playerWinningsTextField = new TextField("Player total winnings: $" + totalWinnings);
 		currentBetTextField = new TextField("Current Bet: $" + currentBet + " on " + betPlacedOn);
-		dealAndPlayAgainButton = new Button("Deal");
-		resultsListView = new ListView<>();
-		resultsList = FXCollections.observableArrayList();
-		centralElements = new VBox(playerWinningsTextField, currentBetTextField, dealAndPlayAgainButton, resultsListView);
-
 		playerWinningsTextField.setMaxSize(512, 32);
-		currentBetTextField.setPadding(new Insets(20, 0,50,0));
 		currentBetTextField.setMaxSize(512, 32);
-		dealAndPlayAgainButton.setPrefSize(512, 48);
-		dealAndPlayAgainButton.setStyle("-fx-font-size: 24");
-
-		for(ImageView cardImage: playerCards){
-			cardImage.setFitWidth(cardWidth);
-			cardImage.setFitHeight(cardHeight);
-		}
-		for(ImageView cardImage: bankerCards){
-			cardImage.setFitWidth(cardWidth);
-			cardImage.setFitHeight(cardHeight);
-		}
-
 		playerWinningsTextField.setEditable(false);
 		currentBetTextField.setEditable(false);
 		playerWinningsTextField.setStyle("-fx-font-size: 20");
 		currentBetTextField.setStyle("-fx-font-size: 20");
+
+		//Button
+		dealAndPlayAgainButton = new Button("Deal");
+		dealAndPlayAgainButton.setPrefSize(512, 48);
+		dealAndPlayAgainButton.setStyle("-fx-font-size: 24");
+
+		//Results display
+		resultsListView = new ListView<>();
+		resultsList = FXCollections.observableArrayList();
 		resultsListView.setStyle("-fx-font-size: 16");
 		resultsListView.setPrefHeight(125);
 
+		//Put everything in nice boxes
+		topCentralElements = new VBox(50, playerWinningsTextField, currentBetTextField);
+		bottomCentralElements = new VBox(dealAndPlayAgainButton, resultsListView);
+		bottomElements = new HBox(5,playerCardBox, bottomCentralElements, bankerCardBox);
+		playSceneElements = new VBox(80, topCentralElements, bottomElements);
+		topCentralElements.setAlignment(Pos.CENTER);
+		bottomCentralElements.setPadding(new Insets(0, 0, 45, 0));
+		bankerCardBox.setAlignment(Pos.CENTER_LEFT);
+		playerCardBox.setAlignment(Pos.CENTER_LEFT);
+		bottomCentralElements.setAlignment(Pos.BOTTOM_CENTER);
 
-
+		//Root BorderPane
+		BorderPane playSceneRoot = new BorderPane();
 		playSceneRoot.setTop(mainMenuBar);
-		playSceneRoot.setLeft(playerCardBox);
-		playSceneRoot.setRight(bankerCardBox);
-		playSceneRoot.setCenter(centralElements);
-		BorderPane.setAlignment(playerCardBox, Pos.BOTTOM_CENTER);
-		BorderPane.setAlignment(bankerCardBox, Pos.BOTTOM_CENTER);
-		BorderPane.setAlignment(centralElements, Pos.CENTER);
-		BorderPane.setMargin(playerCardBox, new Insets(5));
-		BorderPane.setMargin(bankerCardBox, new Insets(5));
-		BorderPane.setMargin(centralElements, new Insets(5));
-
+		playSceneRoot.setCenter(playSceneElements);
+		BorderPane.setMargin(playSceneElements, new Insets(80,5,100,5));
 		playSceneRoot.setId("background");
 
-		Scene startScene = new Scene(playSceneRoot, 1080, 720);
-		startScene.getStylesheets().add(String.valueOf(this.getClass().getResource("style.css")));
+		Scene playScene = new Scene(playSceneRoot, 1080, 720);
+		playScene.getStylesheets().add(String.valueOf(this.getClass().getResource("style.css")));
 
-		return startScene;
+		return playScene;
 	}// end createPlayScene
 
 
@@ -558,10 +560,11 @@ public class BaccaratGame extends Application {
 	//Called whenever a round ends. Evaluates the winnings, displays the result,
 	//and sets up button for replaying the game
 	public void endRound(){
-		double roundWinnings = evaluateWinnings();
+		//Evaluate winnings
 		totalWinnings += evaluateWinnings();
 		playerWinningsTextField.setText("Player total winnings: $" + totalWinnings);
 
+		//Display results
 		resultsList.add("Player Total: " + gameLogic.handTotal(playerHand) +
 				" Banker Total: " + gameLogic.handTotal(bankerHand));
 		String winner = gameLogic.whoWon(playerHand, bankerHand);
@@ -574,20 +577,20 @@ public class BaccaratGame extends Application {
 
 		if(this.betPlacedOn.equals("Draw"))
 		{
-			if (roundWinnings < 0) {
-				resultsList.add("Sorry, you bet Tie! You lost your bet!");
-			} else {
+			if (winner.equals(betPlacedOn)) {
 				resultsList.add("Congrats you bet Tie! You won!");
+			} else {
+				resultsList.add("Sorry, you bet Tie! You lost your bet!");
 			}
 		}else {
-			if (roundWinnings < 0) {
-				resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
-			} else {
+			if (winner.equals(betPlacedOn)) {
 				resultsList.add("Congrats you bet " + this.betPlacedOn + "! You won!");
+			} else {
+				resultsList.add("Sorry, you bet " + this.betPlacedOn + "! You lost your bet!");
 			}
 		}
 		resultsListView.setItems(resultsList);
-
+		//Set button for replaying
 		dealAndPlayAgainButton.setOnAction(replayEvent);
 		dealAndPlayAgainButton.setText("Replay");
 	}
